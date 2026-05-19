@@ -73,6 +73,12 @@ async function run() {
       res.send(result);
     });
 
+    // 6. Get all appointments
+    app.get('/appointments', async (req, res) => {
+      const result = await appointmentCollection.find().toArray();
+      res.send(result);
+    });
+
     // Connect and Verify
     await client.connect();
     await client.db("admin").command({ ping: 1 });
