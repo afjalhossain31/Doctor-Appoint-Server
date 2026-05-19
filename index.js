@@ -26,6 +26,7 @@ async function run() {
     // Database and Collection
     const db = client.db("Doctor-Appoint");
     const doctorCollection = db.collection("doctors");
+    const appointmentCollection = db.collection("appointments");
 
     // 1. Get all doctors
     app.get('/doctors', async (req, res) => {
@@ -50,6 +51,26 @@ async function run() {
       } catch (error) {
         res.status(500).send({ message: "Failed to add doctor", error });
       }
+    });
+
+    // 4. Add new appointment
+    app.post('/appointments', async (req, res) => {
+      console.log("Receiving Data:", req.body); // Eita dile backend console-e data dekha jabe
+      try {
+        const appointmentData = req.body;
+        const result = await appointmentCollection.insertOne(appointmentData);
+        res.send(result);
+      } catch (error) {
+        console.error("Error:", error);
+        res.status(500).send({ message: "Failed to book appointment", error });
+      }
+    });
+
+    // 5. Get appointments for a user
+    app.get('/appointments/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await appointmentCollection.find({ userEmail: email }).toArray();
+      res.send(result);
     });
 
     // Connect and Verify
