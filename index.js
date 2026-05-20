@@ -27,6 +27,7 @@ async function run() {
     const db = client.db("Doctor-Appoint");
     const doctorCollection = db.collection("doctors");
     const appointmentCollection = db.collection("appointments");
+    const userCollection = db.collection("users");
 
     // 1. Get all doctors
     app.get('/doctors', async (req, res) => {
@@ -77,6 +78,39 @@ async function run() {
     app.get('/appointments', async (req, res) => {
       const result = await appointmentCollection.find().toArray();
       res.send(result);
+    });
+
+    // 7. Store user info during registration
+    app.post('/users', async (req, res) => {
+      try {
+        const user = req.body;
+        // Check if user already exists
+        const query = { email: user.email };
+        const existingUser = await userCollection.findOne(query);
+        if (existingUser) {
+          return res.send({ message: 'user already exists', insertedId: null });
+        }
+        const result = await userCollection.insertOne(user);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to save user", error });
+      }
+    });
+
+    // 8. Delete a doctor by ID
+    app.delete('/doctors/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await doctorCollection.deleteOne(query);
+        if (result.deletedCount === 1) {
+          res.send({ message: "Doctor deleted successfully", success: true });
+        } else {
+          res.status(404).send({ message: "Doctor not found" });
+        }
+      } catch (error) {
+        res.status(500).send({ message: "Failed to delete doctor", error });
+      }
     });
 
     // Connect and Verify
