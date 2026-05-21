@@ -169,10 +169,9 @@ async function run() {
       }
     });
 
-    // Connect and Verify
-    // await client.connect(); // Eita dile connection error ashte pare, tai eta comment kore rakhlam
-
-    // await client.db("admin").command({ ping: 1 });
+    // Connect and Verify - deploy er jonno ei 2ta comment kora lagbe
+    await client.connect(); 
+    await client.db("admin").command({ ping: 1 });
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
