@@ -1,6 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const cors = require('cors'); // Frontend theke request allow korar jonno
+const cors = require('cors'); 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dotenv.config();
 
@@ -43,7 +43,7 @@ async function run() {
       res.send(result);
     });
 
-    // 3. Add a new doctor (APNAR NOTUN CODE)
+    // 3. Add a new doctor
     app.post('/doctors', async (req, res) => {
       try {
         const newDoctor = req.body;
@@ -170,8 +170,10 @@ async function run() {
     });
 
     // Connect and Verify
-    await client.connect();
-    await client.db("admin").command({ ping: 1 });
+    // await client.connect(); // Eita dile connection error ashte pare, tai eta comment kore rakhlam
+
+    // await client.db("admin").command({ ping: 1 });
+
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
     console.error("Connection error:", error);
@@ -183,6 +185,10 @@ app.get('/', (req, res) => {
   res.send('Welcome to Doctor Appointment System!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+if (process.env.VERCEL !== '1') {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
+
+module.exports = app;
