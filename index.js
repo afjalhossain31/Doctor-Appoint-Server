@@ -80,7 +80,63 @@ async function run() {
       res.send(result);
     });
 
-    // 7. Store user info during registration
+    // 7. Update appointment by ID (with user ownership check)
+    app.put('/appointments/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const { appointmentDate, appointmentTime, userEmail } = req.body;
+
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).send({ message: 'Invalid id' });
+        }
+
+        const result = await appointmentCollection.updateOne(
+          { _id: new ObjectId(id), userEmail },
+          {
+            $set: {
+              appointmentDate,
+              appointmentTime,
+              updatedAt: new Date(),
+            },
+          }
+        );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ message: 'Not found or unauthorized' });
+        }
+
+        res.send({ message: 'Appointment updated successfully' });
+      } catch (error) {
+        res.status(500).send({ message: 'Update failed', error });
+      }
+    });
+
+    // 8. Delete appointment by ID (with user ownership check)
+    app.delete('/appointments/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const userEmail = req.query.userEmail || req.body?.userEmail;
+
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).send({ message: 'Invalid id' });
+        }
+
+        const result = await appointmentCollection.deleteOne({
+          _id: new ObjectId(id),
+          userEmail,
+        });
+
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ message: 'Not found or unauthorized' });
+        }
+
+        res.send({ message: 'Appointment deleted successfully' });
+      } catch (error) {
+        res.status(500).send({ message: 'Delete failed', error });
+      }
+    });
+
+    // 9. Store user info during registration
     app.post('/users', async (req, res) => {
       try {
         const user = req.body;
@@ -97,7 +153,7 @@ async function run() {
       }
     });
 
-    // 8. Delete a doctor by ID
+    // 10. Delete a doctor by ID
     app.delete('/doctors/:id', async (req, res) => {
       try {
         const id = req.params.id;
@@ -124,7 +180,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-  res.send('Hello, Afjal Hossain Coming!');
+  res.send('Welcome to Doctor Appointment System!');
 });
 
 app.listen(port, () => {
